@@ -83,7 +83,7 @@ def initialize_session_state():
 
 
 def sidebar_controls():
-    st.sidebar.markdown("## 📁 Data Upload")
+    st.sidebar.markdown("##  Data Upload")
     
     st.sidebar.markdown("### Reference Dataset")
     reference_file = st.sidebar.file_uploader(
@@ -111,13 +111,13 @@ def sidebar_controls():
             st.session_state.reference_data = df
             st.session_state.reference_stats = st.session_state.data_loader.compute_reference_stats(df)
             
-            st.sidebar.success(f"✅ Reference data loaded: {len(df)} rows, {len(df.columns)} columns")
+            st.sidebar.success(f" Reference data loaded: {len(df)} rows, {len(df.columns)} columns")
             
         except Exception as e:
             st.sidebar.error(f"Error loading reference data: {str(e)}")
     
     st.sidebar.markdown("---")
-    st.sidebar.markdown("## ⚙️ Drift Thresholds")
+    st.sidebar.markdown("##  Drift Thresholds")
     
     col1, col2 = st.sidebar.columns(2)
     with col1:
@@ -152,7 +152,7 @@ def sidebar_controls():
     )
     
     st.sidebar.markdown("---")
-    st.sidebar.markdown("## 📊 Incoming Data")
+    st.sidebar.markdown("## Incoming Data")
     
     current_file = st.sidebar.file_uploader(
         "Upload new data for monitoring (CSV)",
@@ -166,14 +166,14 @@ def sidebar_controls():
             aligned_df = st.session_state.data_loader.align_schema(current_df)
             st.session_state.current_data = aligned_df
             
-            st.sidebar.success(f"✅ Current data loaded: {len(aligned_df)} rows")
+            st.sidebar.success(f"Current data loaded: {len(aligned_df)} rows")
             
         except Exception as e:
             st.sidebar.error(f"Error loading current data: {str(e)}")
     
     if st.session_state.current_data is not None:
         st.sidebar.markdown("---")
-        st.sidebar.markdown("## 🔄 Batch Processing")
+        st.sidebar.markdown("## Batch Processing")
         
         batch_size = st.sidebar.slider(
             "Batch size",
@@ -181,10 +181,10 @@ def sidebar_controls():
             help="Number of rows per batch"
         )
         
-        if st.sidebar.button("🚀 Process Next Batch", use_container_width=True):
+        if st.sidebar.button("Process Next Batch", use_container_width=True):
             process_batch(batch_size)
         
-        if st.sidebar.button("🔁 Reset Monitor", use_container_width=True):
+        if st.sidebar.button("Reset Monitor", use_container_width=True):
             reset_monitor()
 
 
@@ -257,8 +257,8 @@ def process_batch(batch_size):
                 'message': f"Moderate drift detected in {row['feature']}: {row['explanation']}"
             }
             st.session_state.alerts.append(alert)
-    
-    st.success(f"✅ Batch {st.session_state.batch_counter} processed ({len(batch_df)} rows)")
+
+    st.success(f"Batch {st.session_state.batch_counter} processed ({len(batch_df)} rows)")
 
 
 def reset_monitor():
@@ -271,7 +271,7 @@ def reset_monitor():
 
 def render_overview():
     if not st.session_state.batch_results:
-        st.info("📊 Upload data and process batches to start monitoring")
+        st.info("Upload data and process batches to start monitoring")
         return
     
     latest_batch = st.session_state.batch_results[-1]
@@ -305,7 +305,7 @@ def render_overview():
 
 
 def render_data_drift_tab():
-    st.markdown("### 📈 Feature-Level Drift Analysis")
+    st.markdown("### Feature-Level Drift Analysis")
     
     if not st.session_state.batch_results:
         st.info("Process batches to see drift analysis")
@@ -318,11 +318,11 @@ def render_data_drift_tab():
     
     def highlight_severity(val):
         if val == 'SEVERE_DRIFT':
-            return 'background-color: #ffebee'
+            return 'background-color: #c62828; color: #fff;'
         elif val == 'MODERATE_DRIFT':
-            return 'background-color: #fff3e0'
+            return 'background-color: #f57c00; color: #fff;'
         else:
-            return 'background-color: #e8f5e9'
+            return 'background-color: #2e7d32; color: #fff;'
     
     styled_df = drift_results.style.applymap(
         highlight_severity, 
@@ -382,10 +382,10 @@ def render_data_drift_tab():
 
 
 def render_concept_drift_tab():
-    st.markdown("### 🧠 Concept Drift Analysis")
+    st.markdown("### Concept Drift Analysis")
     
     if st.session_state.target_column is None:
-        st.warning("⚠️ No target column selected. Please select a target column in the sidebar.")
+        st.warning("No target column selected. Please select a target column in the sidebar.")
         return
     
     if not st.session_state.batch_results:
@@ -413,17 +413,17 @@ def render_concept_drift_tab():
     
     if severity == 'SEVERE_DRIFT':
         st.markdown('<div class="alert-box alert-severe">', unsafe_allow_html=True)
-        st.markdown(f"🚨 **SEVERE CONCEPT DRIFT DETECTED**")
+        st.markdown(f"**SEVERE CONCEPT DRIFT DETECTED**")
         st.markdown(f"{concept_drift_result['explanation']}")
         st.markdown('</div>', unsafe_allow_html=True)
     elif severity == 'MODERATE_DRIFT':
         st.markdown('<div class="alert-box alert-moderate">', unsafe_allow_html=True)
-        st.markdown(f"⚠️ **Moderate Concept Drift Detected**")
+        st.markdown(f"**Moderate Concept Drift Detected**")
         st.markdown(f"{concept_drift_result['explanation']}")
         st.markdown('</div>', unsafe_allow_html=True)
     else:
         st.markdown('<div class="alert-box alert-good">', unsafe_allow_html=True)
-        st.markdown(f"✅ **No Concept Drift Detected**")
+        st.markdown(f"**No Concept Drift Detected**")
         st.markdown(f"{concept_drift_result['explanation']}")
         st.markdown('</div>', unsafe_allow_html=True)
     
@@ -472,10 +472,10 @@ def render_alerts_tab():
     for alert in reversed(filtered_alerts):  # Show most recent first
         if alert['severity'] == 'SEVERE':
             st.markdown('<div class="alert-box alert-severe">', unsafe_allow_html=True)
-            icon = "🚨"
+            icon = ""
         else:
             st.markdown('<div class="alert-box alert-moderate">', unsafe_allow_html=True)
-            icon = "⚠️"
+            icon = ""
         
         st.markdown(f"{icon} **Batch {alert['batch_num']}** - {alert['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}")
         st.markdown(f"Feature: **{alert['feature']}**")
@@ -484,7 +484,7 @@ def render_alerts_tab():
 
 
 def render_export_section():
-    st.markdown("### 💾 Export Reports")
+    st.markdown("### Export Reports")
     
     if not st.session_state.batch_results:
         st.info("No data to export yet")
@@ -493,7 +493,7 @@ def render_export_section():
     col1, col2 = st.columns(2)
     
     with col1:
-        if st.button("📄 Export Drift Summary (CSV)", use_container_width=True):
+        if st.button(" Export Drift Summary (CSV)", use_container_width=True):
             latest_batch = st.session_state.batch_results[-1]
             drift_results = latest_batch['drift_results']
             
@@ -508,7 +508,7 @@ def render_export_section():
             )
     
     with col2:
-        if st.button("📋 Export Full History (JSON)", use_container_width=True):
+        if st.button("Export Full History (JSON)", use_container_width=True):
             export_data = {
                 'batch_count': st.session_state.batch_counter,
                 'alerts': [
@@ -537,7 +537,7 @@ def render_export_section():
 def main():
     initialize_session_state()
     
-    st.markdown('<div class="main-header">📊 Production Data Drift Monitor</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header">Production Data Drift Monitor</div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-header">Real-time statistical drift detection with KS Test & PSI</div>', unsafe_allow_html=True)
     
     sidebar_controls()
@@ -551,10 +551,10 @@ def main():
     st.markdown("---")
     
     tab1, tab2, tab3, tab4 = st.tabs([
-        "📈 Data Drift",
-        "🧠 Concept Drift",
-        "🚨 Alerts",
-        "💾 Export"
+        "Data Drift",
+        "Concept Drift",
+        "Alerts",
+        "Export"
     ])
     
     with tab1:
