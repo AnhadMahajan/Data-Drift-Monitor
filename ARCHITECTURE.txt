@@ -1,0 +1,411 @@
+"""
+TECHNICAL ARCHITECTURE - Data Drift Monitor
+===========================================
+
+SYSTEM OVERVIEW
+---------------
+
+The Data Drift Monitor is a production-grade MLOps tool that implements
+statistical drift detection for machine learning systems. It follows
+enterprise-level design patterns for reliability, modularity, and scalability.
+
+ARCHITECTURE DIAGRAM
+--------------------
+
+┌─────────────────────────────────────────────────────────────────┐
+│                        USER INTERFACE                           │
+│                      (Streamlit App)                            │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐           │
+│  │  Sidebar    │  │  Main Panel │  │   Tabs      │           │
+│  │  Controls   │  │  Metrics    │  │  Dashboard  │           │
+│  └─────────────┘  └─────────────┘  └─────────────┘           │
+│         │                 │                 │                  │
+└─────────┼─────────────────┼─────────────────┼──────────────────┘
+          │                 │                 │
+          └─────────────────┴─────────────────┘
+                            │
+┌───────────────────────────┼──────────────────────────────────┐
+│                      BUSINESS LOGIC                          │
+├──────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌──────────────────┐    ┌──────────────────┐              │
+│  │  DataLoader      │    │  DriftDetector   │              │
+│  │  - Schema Inf.   │    │  - KS Test       │              │
+│  │  - Alignment     │    │  - PSI Calc      │              │
+│  │  - Validation    │    │  - Concept Drift │              │
+│  └──────────────────┘    └──────────────────┘              │
+│           │                       │                          │
+│           └───────────┬───────────┘                          │
+│                       │                                      │
+│           ┌───────────▼───────────┐                          │
+│           │   DriftVisualizer     │                          │
+│           │   - Distribution      │                          │
+│           │   - Timeline          │                          │
+│           │   - Heatmap           │                          │
+│           └───────────────────────┘                          │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘
+                            │
+┌───────────────────────────┼──────────────────────────────────┐
+│                      DATA LAYER                              │
+├──────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌────────────────┐  ┌────────────────┐  ┌──────────────┐  │
+│  │  Reference     │  │  Current       │  │  Session     │  │
+│  │  Data (CSV)    │  │  Data (CSV)    │  │  State       │  │
+│  └────────────────┘  └────────────────┘  └──────────────┘  │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘
+
+
+MODULE BREAKDOWN
+----------------
+
+1. app.py (Main Application)
+   ├── initialize_session_state()       # State management
+   ├── sidebar_controls()               # Input controls
+   ├── process_batch()                  # Batch processing
+   ├── render_overview()                # Metrics display
+   ├── render_data_drift_tab()          # Data drift view
+   ├── render_concept_drift_tab()       # Concept drift view
+   ├── render_alerts_tab()              # Alert management
+   └── render_export_section()          # Export functionality
+
+2. drift.py (Drift Detection)
+   ├── DriftDetector
+   │   ├── ks_test()                    # Kolmogorov-Smirnov test
+   │   ├── psi()                        # Population Stability Index
+   │   ├── _psi_numerical()             # PSI for numbers
+   │   ├── _psi_categorical()           # PSI for categories
+   │   ├── detect_feature_drift()       # Multi-feature detection
+   │   └── detect_concept_drift()       # Target drift detection
+   └── DriftSeverity (Enum)             # Severity levels
+
+3. data_loader.py (Data Management)
+   ├── DataLoader
+   │   ├── load_csv()                   # CSV loading
+   │   ├── infer_schema()               # Auto schema detection
+   │   ├── set_reference_schema()       # Cache reference
+   │   ├── align_schema()               # Schema alignment
+   │   ├── get_feature_lists()          # Feature retrieval
+   │   ├── validate_data()              # Data validation
+   │   ├── create_batches()             # Batch creation
+   │   └── compute_reference_stats()    # Statistics caching
+
+4. viz.py (Visualization)
+   ├── DriftVisualizer
+   │   ├── plot_distribution_comparison() # Distribution plots
+   │   ├── _plot_numerical_distribution() # Numerical histograms
+   │   ├── _plot_categorical_distribution() # Categorical bars
+   │   ├── plot_drift_timeline()        # Time series
+   │   ├── plot_global_drift_overview() # Summary dashboard
+   │   ├── plot_drift_heatmap()         # Heatmap visualization
+   │   └── plot_concept_drift()         # Concept drift plots
+
+
+DATA FLOW
+---------
+
+1. INITIALIZATION
+   User Uploads → DataLoader.load_csv() → Schema Inference
+                                        ↓
+   Reference Stats Cached → st.session_state.reference_stats
+
+2. BATCH PROCESSING
+   Current Data → DataLoader.align_schema() → Aligned DataFrame
+                                            ↓
+   DriftDetector.detect_feature_drift() → Drift Results
+                                            ↓
+   Update History → Generate Alerts → Store in Session State
+
+3. VISUALIZATION
+   Session State → DriftVisualizer → Matplotlib Figures → Streamlit Display
+
+4. EXPORT
+   Session State → Format (CSV/JSON) → Download Button
+
+
+STATE MANAGEMENT
+----------------
+
+st.session_state structure:
+{
+    'reference_data': pd.DataFrame,           # Cached reference
+    'reference_stats': Dict,                  # Cached statistics
+    'data_loader': DataLoader,                # Singleton instance
+    'drift_detector': DriftDetector,          # Configured detector
+    'current_data': pd.DataFrame,             # Current dataset
+    'drift_history': Dict[str, List[Dict]],   # Per-feature history
+    'batch_results': List[Dict],              # Batch-level results
+    'batch_counter': int,                     # Processed batches
+    'target_column': str,                     # Target for concept drift
+    'alerts': List[Dict]                      # Alert history
+}
+
+Key Principle: NEVER reset state on rerun
+- Reference stats computed once
+- History accumulated incrementally
+- No redundant computations
+
+
+STATISTICAL METHODS
+-------------------
+
+1. Kolmogorov-Smirnov (KS) Test
+   Purpose: Detect distribution shift in numerical features
+   Method: Two-sample KS test from scipy.stats
+   Output: KS statistic (0-1), p-value
+   Interpretation:
+   - Tests null hypothesis: distributions are identical
+   - Large KS statistic → distributions differ
+   - Used for: Continuous numerical features
+
+2. Population Stability Index (PSI)
+   Purpose: Quantify distribution stability
+   Method: Information-theoretic divergence
+   Formula: PSI = Σ (P_current - P_reference) × ln(P_current/P_reference)
+   Output: PSI score (0-∞)
+   Interpretation:
+   - 0: Identical distributions
+   - <0.1: No significant drift
+   - 0.1-0.25: Moderate drift
+   - >0.25: Severe drift
+   Used for: Both numerical (binned) and categorical features
+
+
+DRIFT DETECTION WORKFLOW
+-------------------------
+
+For each feature:
+1. Extract reference and current data
+2. Apply appropriate test(s):
+   - Numerical: KS test + PSI
+   - Categorical: PSI only
+3. Compare against thresholds
+4. Determine severity:
+   - NO_DRIFT: All metrics below moderate threshold
+   - MODERATE_DRIFT: Any metric exceeds moderate threshold
+   - SEVERE_DRIFT: Any metric exceeds severe threshold
+5. Store results with explanation
+6. Generate alerts if needed
+
+
+CONCEPT DRIFT DETECTION
+------------------------
+
+Concept drift = change in P(Y) or P(Y|X)
+
+Detection approach:
+1. Extract target variable from reference and current data
+2. Determine task type:
+   - Classification: Use PSI on categorical target
+   - Regression: Use KS test + PSI on numerical target
+3. Interpret results:
+   - Data drift: Features changed
+   - Concept drift: Target distribution changed
+   - Both can occur simultaneously
+
+
+VISUALIZATION STRATEGY
+----------------------
+
+1. Distribution Comparison
+   - Overlapping histograms (numerical)
+   - Side-by-side bars (categorical)
+   - Color coding: Blue (reference), Orange (current)
+   - Annotation box with metrics
+
+2. Drift Timeline
+   - Dual plot: KS statistic and PSI over time
+   - Color-coded points by severity
+   - Shows trend and volatility
+
+3. Global Overview
+   - Pie chart: Severity distribution
+   - Bar chart: PSI by feature
+   - Quick assessment of overall drift
+
+4. Drift Heatmap
+   - Rows: Features
+   - Columns: Batch numbers
+   - Colors: Severity level
+   - Reveals patterns across time and features
+
+
+PERFORMANCE OPTIMIZATIONS
+--------------------------
+
+1. Caching
+   - Reference statistics computed once
+   - Stored in st.session_state
+   - Never recomputed on reruns
+
+2. Batch Processing
+   - Prevents memory overflow with large datasets
+   - Incremental history updates
+   - Configurable batch size
+
+3. Lazy Evaluation
+   - Visualizations created on-demand
+   - Only current batch drift computed
+   - Historical data reused
+
+4. Efficient Operations
+   - NumPy vectorization
+   - Pandas optimized methods
+   - Minimal data copying
+
+
+EXTENSIBILITY POINTS
+--------------------
+
+1. Custom Drift Metrics
+   - Add methods to DriftDetector class
+   - Implement new statistical tests
+   - Example: Chi-square test, Wasserstein distance
+
+2. Database Integration
+   - Replace CSV with SQL queries
+   - Store history in database
+   - Enable historical analysis
+
+3. Alert Mechanisms
+   - Email notifications
+   - Slack integration
+   - PagerDuty alerts
+
+4. Model Performance Integration
+   - Combine with prediction monitoring
+   - Track drift vs. accuracy correlation
+   - Automated retraining triggers
+
+5. Multi-Model Monitoring
+   - Track multiple models
+   - Comparative drift analysis
+   - Model selection based on drift
+
+
+BEST PRACTICES IMPLEMENTED
+---------------------------
+
+1. Separation of Concerns
+   - Data loading separate from drift detection
+   - Visualization isolated from business logic
+   - Clear module boundaries
+
+2. State Management
+   - Centralized in session_state
+   - No global variables
+   - Explicit state dependencies
+
+3. Error Handling
+   - Try-catch blocks for file I/O
+   - Validation of inputs
+   - Graceful degradation
+
+4. User Experience
+   - Clear visual indicators
+   - Explanatory text
+   - Progressive disclosure
+   - Contextual help
+
+5. Code Quality
+   - Type hints
+   - Docstrings
+   - Consistent naming
+   - Modular functions
+
+
+PRODUCTION DEPLOYMENT CONSIDERATIONS
+------------------------------------
+
+1. Scalability
+   - Batch processing prevents memory issues
+   - Consider distributed processing for large scale
+   - Database for persistent storage
+
+2. Reliability
+   - Error handling for data issues
+   - Validation of inputs
+   - Fallback mechanisms
+
+3. Monitoring
+   - Log all drift events
+   - Track system performance
+   - Monitor alert fatigue
+
+4. Security
+   - Validate uploaded files
+   - Sanitize inputs
+   - Access control for sensitive data
+
+5. Maintenance
+   - Regularly review thresholds
+   - Update based on false positive rate
+   - Document threshold changes
+
+
+TESTING STRATEGY
+-----------------
+
+1. Unit Tests
+   - Test each drift metric independently
+   - Verify threshold logic
+   - Validate data transformations
+
+2. Integration Tests
+   - End-to-end workflow
+   - State persistence
+   - Multi-batch processing
+
+3. Validation Tests
+   - Known drift scenarios
+   - Ground truth datasets
+   - Threshold sensitivity analysis
+
+
+TECHNICAL DECISIONS & RATIONALE
+--------------------------------
+
+Why Streamlit?
+- Rapid prototyping
+- Built-in state management
+- Easy deployment
+- Good for internal tools
+
+Why Matplotlib (not Seaborn)?
+- More control over styling
+- Better for production
+- Explicit requirement
+- No additional dependencies
+
+Why KS Test + PSI?
+- Industry standard metrics
+- Complementary information
+- Well-understood thresholds
+- Applicable to various data types
+
+Why Batch Processing?
+- Simulates production streaming
+- Memory efficient
+- Allows real-time monitoring simulation
+- User control over processing speed
+
+
+SUMMARY
+-------
+
+This system demonstrates production-grade MLOps practices:
+✓ Modular, maintainable code
+✓ State-safe operations
+✓ Comprehensive drift detection
+✓ Professional visualizations
+✓ Clear explanations
+✓ Export capabilities
+✓ Extensible architecture
+
+Ready for integration into existing MLOps pipelines
+and adaptation to specific use cases.
+"""

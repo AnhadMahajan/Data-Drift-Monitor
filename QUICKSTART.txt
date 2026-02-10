@@ -1,0 +1,159 @@
+"""
+QUICK START GUIDE - Data Drift Monitor
+======================================
+
+Follow these steps to get started in 2 minutes!
+
+STEP 1: Install Dependencies
+-----------------------------
+pip install -r requirements.txt
+
+STEP 2: Generate Sample Data
+-----------------------------
+python generate_sample_data.py
+
+This creates 5 CSV files:
+✓ reference_data.csv (baseline)
+✓ current_data_no_drift.csv (control)
+✓ current_data_moderate_drift.csv (some drift)
+✓ current_data_severe_drift.csv (significant drift)
+✓ current_data_progressive_drift.csv (gradual drift)
+
+STEP 3: Launch the App
+-----------------------
+streamlit run app.py
+
+The app will open at http://localhost:8501
+
+STEP 4: Upload Data
+-------------------
+In the sidebar:
+1. Upload "reference_data.csv" as Reference Dataset
+2. Select "churn" as the target column
+3. Upload "current_data_severe_drift.csv" as Incoming Data
+
+STEP 5: Process Batches
+------------------------
+1. Set batch size to 100 (default)
+2. Click "Process Next Batch" repeatedly
+3. Watch the drift detection in action!
+
+STEP 6: Explore Features
+-------------------------
+Navigate through the tabs:
+
+📈 DATA DRIFT
+- View drift table with color-coded severity
+- See global drift overview charts
+- Analyze individual features
+- Check drift timelines
+- Examine drift heatmap
+
+🧠 CONCEPT DRIFT
+- Monitor target variable shifts
+- Understand concept vs data drift
+- See target distribution comparison
+
+🚨 ALERTS
+- Review all drift warnings
+- Filter by severity
+- Track alert history
+
+💾 EXPORT
+- Download CSV summaries
+- Export JSON history
+
+UNDERSTANDING THE RESULTS
+--------------------------
+
+PSI (Population Stability Index):
+• < 0.10: No significant drift ✅
+• 0.10 - 0.25: Moderate drift ⚠️
+• > 0.25: Severe drift 🚨
+
+KS Statistic:
+• < 0.05: No significant drift ✅
+• 0.05 - 0.10: Moderate drift ⚠️
+• > 0.10: Severe drift 🚨
+
+WHAT TO DO IF DRIFT IS DETECTED
+--------------------------------
+
+1. INVESTIGATE
+   - Check data quality issues
+   - Verify upstream data changes
+   - Review business context
+
+2. ANALYZE
+   - Which features are drifting?
+   - Is it data drift or concept drift?
+   - Is it gradual or sudden?
+
+3. DECIDE
+   - Minor drift: Monitor closely
+   - Moderate drift: Plan retraining
+   - Severe drift: Take immediate action
+
+4. ACT
+   - Fix data pipeline issues
+   - Retrain model with new data
+   - Update monitoring thresholds
+   - Document findings
+
+TESTING DIFFERENT SCENARIOS
+----------------------------
+
+Scenario 1: No Drift
+Upload: current_data_no_drift.csv
+Expected: All green, no alerts
+
+Scenario 2: Moderate Drift  
+Upload: current_data_moderate_drift.csv
+Expected: Orange warnings, some alerts
+
+Scenario 3: Severe Drift
+Upload: current_data_severe_drift.csv
+Expected: Red alerts, many features drifting
+
+Scenario 4: Progressive Drift
+Upload: current_data_progressive_drift.csv
+Expected: Drift increases over batches
+
+TIPS FOR PRODUCTION USE
+------------------------
+
+1. Set appropriate thresholds based on your domain
+2. Monitor regularly (daily for critical models)
+3. Combine with model performance monitoring
+4. Export reports for documentation
+5. Investigate alerts promptly
+6. Track drift patterns over time
+
+TROUBLESHOOTING
+----------------
+
+Problem: "No module named 'streamlit'"
+Solution: pip install -r requirements.txt
+
+Problem: "Schema mismatch"
+Solution: Ensure incoming data has same columns as reference
+
+Problem: "No drift detected"
+Solution: Try current_data_severe_drift.csv to see obvious drift
+
+Problem: App not updating
+Solution: Click "Process Next Batch" to trigger updates
+
+NEXT STEPS
+----------
+
+1. Try with your own datasets
+2. Experiment with different thresholds
+3. Monitor your production models
+4. Integrate with your MLOps pipeline
+5. Customize for your specific needs
+
+For detailed documentation, see README.md
+
+Happy Monitoring! 🎉
+"""
