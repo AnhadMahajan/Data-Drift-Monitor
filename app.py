@@ -537,7 +537,7 @@ def render_export_section():
 def main():
     initialize_session_state()
     
-    st.markdown('<div class="main-header">Production Data Drift Monitor</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header">Data Drift Monitor</div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-header">Real-time statistical drift detection with KS Test & PSI</div>', unsafe_allow_html=True)
     
     sidebar_controls()
