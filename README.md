@@ -1,4 +1,6 @@
 # 📊 Production Data Drift Monitor
+Check it out [here](https://data-drift-monitor-zwbh5nqrsa5eb4k8dddt7l.streamlit.app/) or run locally with `streamlit run app.py`
+
 
 A robust, production-style data drift monitoring system built with Streamlit for real-time detection of **data drift** and **concept drift** in machine learning systems.
 
@@ -385,7 +387,3 @@ For issues or questions:
 2. Review sample data generation
 3. Verify all dependencies installed
 4. Check Streamlit version compatibility
-
----
-
-**Built with ❤️ for MLOps Engineers**
