@@ -1,10 +1,10 @@
-# 📊 Production Data Drift Monitor
+#  Production Data Drift Monitor
 Check it out [here](https://data-drift-monitor-zwbh5nqrsa5eb4k8dddt7l.streamlit.app/) or run locally with `streamlit run app.py`
 
 
 A robust, production-style data drift monitoring system built with Streamlit for real-time detection of **data drift** and **concept drift** in machine learning systems.
 
-## 🎯 Overview
+## Overview
 
 This system implements industry-standard statistical tests to monitor ML model inputs and detect when the data distribution shifts from the training baseline. It helps MLOps teams:
 
@@ -14,7 +14,7 @@ This system implements industry-standard statistical tests to monitor ML model i
 - **Generate Alerts**: Automated warnings when drift exceeds thresholds
 - **Simulate Production**: Batch processing to simulate streaming data
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 .
@@ -52,7 +52,7 @@ This system implements industry-standard statistical tests to monitor ML model i
 - Tabbed interface for different views
 - Export functionality (CSV, JSON)
 
-## 📋 Features
+##  Features
 
 ### ✅ Implemented
 
@@ -88,7 +88,7 @@ This system implements industry-standard statistical tests to monitor ML model i
   - ✓ CSV export of drift summaries
   - ✓ JSON export of full history
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Installation
 
@@ -119,7 +119,7 @@ streamlit run app.py
 
 The app will open in your browser at `http://localhost:8501`
 
-## 📖 Usage Guide
+## Usage Guide
 
 ### 1. Upload Reference Data
 
@@ -175,7 +175,7 @@ Adjust drift detection sensitivity:
 - Export JSON history
 - Share reports with team
 
-## 📊 Understanding the Metrics
+## Understanding the Metrics
 
 ### Kolmogorov-Smirnov (KS) Test
 
@@ -217,7 +217,7 @@ PSI = Σ (P_cur - P_ref) × ln(P_cur / P_ref)
 - Example: Churn rate increases from 20% to 40%
 - Impact: Model's learned patterns no longer valid
 
-## 🛠️ Advanced Usage
+## Advanced Usage
 
 ### Custom Thresholds
 
@@ -242,7 +242,7 @@ The system offers three strategies:
 **Medium batches (100-200):** Balanced approach
 **Large batches (500+):** Less noise, weekly/monthly checks
 
-## 🎨 Visualization Guide
+## Visualization Guide
 
 ### Distribution Comparison
 - **Blue histogram**: Reference distribution
@@ -277,7 +277,7 @@ The system offers three strategies:
 - Check that batch has been processed
 - Verify matplotlib is installed correctly
 
-## 📚 Technical Details
+## Technical Details
 
 ### State Management
 
@@ -302,7 +302,7 @@ The app uses `st.session_state` to persist:
 - Incremental history tracking
 - Efficient numpy/pandas operations
 
-## 🧪 Testing with Sample Data
+## Testing with Sample Data
 
 ### Test Scenario 1: No Drift
 ```
@@ -332,7 +332,7 @@ Current: current_data_progressive_drift.csv
 Expected: Drift increases over batches
 ```
 
-## 📈 Best Practices
+## Best Practices
 
 1. **Set Realistic Thresholds**
    - Start conservative, adjust based on false positives
@@ -357,7 +357,7 @@ Expected: Drift increases over batches
    - Drift detection complements performance monitoring
    - Check both input drift and prediction quality
 
-## 🤝 Contributing
+## Contributing
 
 This is a production-style reference implementation. Key areas for extension:
 
@@ -368,11 +368,11 @@ This is a production-style reference implementation. Key areas for extension:
 - Custom drift metrics
 - A/B test integration
 
-## 📄 License
+## License
 
 This is an educational/reference implementation for MLOps practitioners.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 Built using:
 - **Streamlit**: Interactive web app framework
@@ -380,7 +380,7 @@ Built using:
 - **Pandas/NumPy**: Data manipulation
 - **Matplotlib**: Visualization
 
-## 📞 Support
+## Support
 
 For issues or questions:
 1. Check the Troubleshooting section
